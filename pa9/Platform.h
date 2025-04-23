@@ -7,6 +7,7 @@ using namespace std;
 class Platform {
 public:
 	sf::RectangleShape* rect;
+	//derived classes won't work without a default constructor
 	Platform() {
 		rect = new sf::RectangleShape;
 	}
@@ -20,6 +21,7 @@ public:
 		dv->y -= 30;
 		return 0;
 	}
+	//draw function needs a getter rather than a public member
 	sf::RectangleShape getrect() {
 		return *rect;
 	}

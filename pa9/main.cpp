@@ -7,19 +7,24 @@
 #include <string>
 #include "Platform.h"
 
+//base variables
 const unsigned int WINDOW_WIDTH = 400;
 const unsigned int WINDOW_HEIGHT = 600;
 
 int main() {
+    //window setup
     sf::RenderWindow window(sf::VideoMode(sf::Vector2u(WINDOW_WIDTH, WINDOW_HEIGHT)), "Doodle Jump");
     window.setFramerateLimit(60);
     srand(time(0));
-    int nextPlat = 1;
+    
+    //mc setup
     sf::RectangleShape doodler(sf::Vector2f(30, 30));
     doodler.setFillColor(sf::Color::Blue);
     doodler.setPosition(sf::Vector2f(100, 100));
     doodler.setOrigin(sf::Vector2f(15, 1));
 
+    //platforms
+    int nextPlat = 1;
     std::deque<Platform*> platforms;
     for (int i = 0; i < 6; ++i) {
         nextPlat = (rand() % 5) + 1;
@@ -46,13 +51,17 @@ int main() {
         
     }
 
-    sf::Vector2f doodlerVelocity(0, 0);
+    
+    //text setup
     int score = 0;
     sf::Font font;
     font.openFromFile("Doodle.ttf");
     sf::Text dscore(font, to_string(score));
     dscore.setFillColor(sf::Color::Black);
     dscore.setPosition(sf::Vector2f(0, 0));
+
+    //variables
+    sf::Vector2f doodlerVelocity(0, 0);
     bool ml = false;
     bool mr = false;
     bool active = true;
@@ -60,11 +69,12 @@ int main() {
     yltext.setFillColor(sf::Color::Black);
     yltext.setPosition(sf::Vector2f(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 - 50));
 
+    //main loop
     while (window.isOpen()) {
+        //if player hasnt lost
         if (active) {
+            //checking for keypresses
             while (const std::optional event = window.pollEvent()) {
-                if (event->is<sf::Event::Closed>())
-                    window.close();
                 if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
                     if (keyPressed->scancode == sf::Keyboard::Scancode::Left) {
                         ml = true;
@@ -85,9 +95,9 @@ int main() {
                     }
                 }
             }
+            
+            //mc movement control
             doodlerVelocity.y += 1.25;
-
-
             if (ml) {
                 doodlerVelocity.x -= 5;
             }
@@ -124,12 +134,12 @@ int main() {
             if (doodler.getPosition().y > WINDOW_HEIGHT) {
                 active = false;
             }
+            //move platforms if mc at top
             if (doodler.getPosition().y == 0) {
                 for (auto& platform : platforms) {
                     platform->rect->move(sf::Vector2f(0, -doodlerVelocity.y));
                     score -= doodlerVelocity.y / 10;
                 }
-                std::cout << "Platforms moved\n";
             }
             if (doodler.getPosition().x < 0) {
                 doodler.setPosition(sf::Vector2f(WINDOW_WIDTH, doodler.getPosition().y));
@@ -137,6 +147,8 @@ int main() {
             if (doodler.getPosition().x > WINDOW_WIDTH) {
                 doodler.setPosition(sf::Vector2f(0, doodler.getPosition().y));
             }
+
+            //check for platform trigger or deletion
             int i = 0;
             for (auto& platform : platforms) {
                 int here = true;
@@ -176,6 +188,7 @@ int main() {
                 i++;
             }
 
+            //window displayw
             window.clear(sf::Color::White);
             window.draw(doodler);
             for (auto platform : platforms) {
@@ -185,6 +198,8 @@ int main() {
             window.draw(dscore);
             window.display();
         }
+
+        //if player has lost
         else {
             window.clear(sf::Color::White);
             window.draw(yltext);
