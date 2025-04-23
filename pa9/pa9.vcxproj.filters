@@ -21,6 +21,9 @@
     <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TestApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Platform.h">
@@ -29,10 +32,39 @@
     <ClInclude Include="Application.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="TestApp.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ApplicationBase.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Doodle.ttf">
       <Filter>Source Files</Filter>
     </Font>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="BounceTile.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="BouncyTile.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="BreakTile.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="Character.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="MovingTile.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="Background.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="BackgroundTest.png">
+      <Filter>Source Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

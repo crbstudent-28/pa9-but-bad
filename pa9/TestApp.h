@@ -4,14 +4,12 @@
 #include <deque>
 #include "ApplicationBase.h"
 
-class App : public AppBase
+class TestApp : public AppBase
 {
 public:
-	App();
+	TestApp();
 	bool WinUpdate();
 	void Update();
-	bool IsOpen();
-	void ResetLevel();
 private:
 	sf::RectangleShape doodler;
 	sf::RectangleShape back;
@@ -21,7 +19,4 @@ private:
 	bool inLevel;
 	bool ml;
 	bool mr;
-	int score;
-	int nextPlat;
-	int backPos;
 };

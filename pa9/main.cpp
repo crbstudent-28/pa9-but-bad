@@ -1,22 +1,23 @@
-#include <iostream>
-#include <vector>
-#include <cstdlib>
-#include <ctime>
-#include <string>
 #include "Application.h"
-
+#include "TestApp.h"
+#include "ApplicationBase.h"
 
 int main() 
 {
     srand(time(NULL));
-    App app;
+    App* game = new App();
+    TestApp* tApp = nullptr;
+    AppBase* app = game;
 
     //main loop
-    while (app.IsOpen()) 
+    while (app->IsOpen()) 
     {
-        app.WinUpdate();
-        app.Update();
-        app.Render();
+        if (app->WinUpdate())
+        {
+            tApp = new TestApp();
+            app = tApp;
+        }
+        app->Update();
     }
     return 0;
 }

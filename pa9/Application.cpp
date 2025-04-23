@@ -12,55 +12,40 @@ App::App()
 
     //mc setup
     doodler = sf::RectangleShape(sf::Vector2f(30, 30));
-    doodler.setFillColor(sf::Color::Blue);
-    doodler.setPosition(sf::Vector2f(100, 100));
+    doodler.setTexture(new sf::Texture(sf::Image("Character.png")));
+
+    //mc setup
+    back = sf::RectangleShape(sf::Vector2f(400, 600));
+    back.setTexture(new sf::Texture(sf::Image("Background.png")));
 
     //font setup
     assert(font.openFromFile("Doodle.ttf"));
 
-    //variables
-    doodlerVelocity = sf::Vector2f(0, 0);
-    ml = false;
-    mr = false;
-    inLevel = true;
-    score = 0;
-
-    //platforms
-    nextPlat = 1;
-    for (int i = 0; i < 6; ++i) 
-    {
-        nextPlat = (rand() % 5) + 1;
-        switch (nextPlat) 
-        {
-        case 1:
-            platforms.push_back(new Platform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
-            break;
-        case 2:
-            platforms.push_back(new Platform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
-            break;
-        case 3:
-            platforms.push_back(new Platform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
-            break;
-        case 4:
-            platforms.push_back(new SuperPlatform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
-            break;
-        case 5:
-            platforms.push_back(new BreakPlatform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
-            break;
-        default:
-            platforms.push_back(new Platform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
-            break;
-        }
-    }
+    ResetLevel();
 }
 
-void App::WinUpdate()
+bool App::WinUpdate()
 {
     while (const std::optional event = window.pollEvent()) 
     {
         if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
         {
-            if (keyPressed->scancode == sf::Keyboard::Scancode::Left) 
+            if (keyPressed->scancode == sf::Keyboard::Scancode::R) 
+            {
+                ResetLevel();
+            }
+
+            if (keyPressed->scancode == sf::Keyboard::Scancode::T)
+            {
+                return true;
+            }
+
+            if (keyPressed->scancode == sf::Keyboard::Scancode::Escape)
+            {
+                window.close();
+            }
+
+            if (keyPressed->scancode == sf::Keyboard::Scancode::Left)
             {
                 ml = true;
             }
@@ -84,13 +69,18 @@ void App::WinUpdate()
             }
         }
     }
+    return false;
 }
 
 void App::Update()
 {
     sf::Text dscore = sf::Text(font, to_string(score));
-    dscore.setFillColor(sf::Color::Black);
-    dscore.setPosition(sf::Vector2f(0, 0));
+    dscore.setFillColor(sf::Color::White);
+    dscore.setPosition(sf::Vector2f(0, 5));
+
+    sf::Text controls = sf::Text(font, "L/R Arrow keys to move");
+    controls.setFillColor(sf::Color::White);
+    controls.setPosition(sf::Vector2f(20, 555));
     //if player hasnt lost
     if (inLevel) {
         //mc movement control
@@ -129,10 +119,15 @@ void App::Update()
             doodler.setPosition(sf::Vector2f(doodler.getPosition().x, 0));
         }
         if (doodler.getPosition().y > WINDOW_HEIGHT) {
-            doodlerVelocity.y = -1;
+            inLevel = false;
         }
         //move platforms if mc at top
         if (doodler.getPosition().y == 0) {
+            if (backPos < 2400)
+                backPos -= doodlerVelocity.y / 10;
+            if (backPos > 2400)
+                backPos = 2400;
+            back.setTextureRect(sf::IntRect(sf::Vector2i(0, 2400 - backPos), sf::Vector2i(400, 600)));
             for (auto& platform : platforms) {
                 platform->move(-doodlerVelocity.y);
                 score -= (int)doodlerVelocity.y / 10;
@@ -148,6 +143,7 @@ void App::Update()
         //check for platform trigger or deletion
         int i = 0;
         for (auto& platform : platforms) {
+            platform->update();
             int here = true;
             if (platform->colliding(doodler.getPosition(), doodler.getSize()) && doodlerVelocity.y >= 0) {
                 if (platform->trigger(&doodler, &doodlerVelocity)) {
@@ -159,7 +155,7 @@ void App::Update()
             if (here) {
                 if (platform->rect->getPosition().y > WINDOW_HEIGHT) {
                     platforms.pop_front();
-                    nextPlat = (rand() % 5) + 1;
+                    nextPlat = (rand() % 6) + 1;
                     switch (nextPlat) {
                     case 1:
                         platforms.push_back(new Platform(rand() % (WINDOW_WIDTH - 60), 0));
@@ -176,6 +172,9 @@ void App::Update()
                     case 5:
                         platforms.push_back(new BreakPlatform(rand() % (WINDOW_WIDTH - 60), 0));
                         break;
+                    case 6:
+                        platforms.push_back(new MovePlatform(rand() % (WINDOW_WIDTH - 60), 0));
+                        break;
                     default:
                         platforms.push_back(new Platform(rand() % (WINDOW_WIDTH - 60), 0));
                         break;
@@ -187,34 +186,78 @@ void App::Update()
 
         //window displayw
         window.clear(sf::Color::White);
+        window.draw(back);
         window.draw(doodler);
         for (auto platform : platforms) {
             window.draw(platform->getrect());
         }
         dscore.setString(to_string(score));
         window.draw(dscore);
+        window.draw(controls);
         window.display();
     }
 
     //if player has lost
-    else {
+    else 
+    {
         window.clear(sf::Color::White);
+        window.draw(back);
         sf::Text yltext = sf::Text(font, "YOU LOSE");
-        yltext.setFillColor(sf::Color::Black);
+        yltext.setFillColor(sf::Color::White);
         yltext.setPosition(sf::Vector2f(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 - 50));
+        sf::Text restart = sf::Text(font, "Press R to restart");
+        restart.setFillColor(sf::Color::White);
+        restart.setPosition(sf::Vector2f(0, 0));
         window.draw(yltext);
+        window.draw(restart);
         dscore.setPosition(sf::Vector2f(WINDOW_WIDTH / 2 - 40, WINDOW_HEIGHT / 2 - 20));
         window.draw(dscore);
         window.display();
     }
 }
 
-void App::Render()
+void App::ResetLevel()
 {
+    platforms.clear();
 
-}
+    //variables
+    back.setTextureRect(sf::IntRect(sf::Vector2i(0, 1800), sf::Vector2i(400, 600)));
+    backPos = 600;
+    doodler.setPosition(sf::Vector2f(100, 100));
+    doodlerVelocity = sf::Vector2f(0, 0);
+    ml = false;
+    mr = false;
+    inLevel = true;
+    score = 0;
 
-bool App::IsOpen()
-{
-    return window.isOpen();
+    //platforms
+    nextPlat = 1;
+    for (int i = 0; i < 6; ++i)
+    {
+        nextPlat = (rand() % 6) + 1;
+        switch (nextPlat)
+        {
+        case 1:
+            platforms.push_back(new Platform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
+            break;
+        case 2:
+            platforms.push_back(new Platform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
+            break;
+        case 3:
+            platforms.push_back(new Platform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
+            break;
+        case 4:
+            platforms.push_back(new SuperPlatform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
+            break;
+        case 5:
+            platforms.push_back(new BreakPlatform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
+            break;
+        case 6:
+            platforms.push_back(new MovePlatform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
+            break;
+        default:
+            platforms.push_back(new Platform(rand() % (WINDOW_WIDTH - 60), WINDOW_HEIGHT - 30 - i * 100));
+            break;
+        }
+    }
 }

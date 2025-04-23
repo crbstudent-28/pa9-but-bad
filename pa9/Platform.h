@@ -15,7 +15,7 @@ public:
 		left = posX - 30;
 		right = posX + 30;
 		rect->setPosition(sf::Vector2f(x, y));
-		rect->setFillColor(sf::Color::Green);
+		rect->setTexture(new sf::Texture(sf::Image("BounceTile.png")));
 	}
 	virtual int trigger(sf::RectangleShape* doodler, sf::Vector2f* dv) {
 		dv->y -= 30;
@@ -31,7 +31,7 @@ public:
 	{
 		bool isColliding = true;
 		isColliding &= pos.y		  > posY - 30;
-		isColliding &= pos.y - size.y < posY;
+		isColliding &= pos.y - size.y < posY - 20;
 		isColliding &= pos.x - size.x < right;
 		isColliding &= pos.x		  > left;
 		return isColliding;
@@ -54,7 +54,7 @@ public:
 	SuperPlatform(float x, float y)
 	: Platform(x, y)
 	{
-		rect->setFillColor(sf::Color::Yellow);
+		rect->setTexture(new sf::Texture(sf::Image("BouncyTile.png")));
 	}
 	
 	int trigger(sf::RectangleShape* doodler, sf::Vector2f* dv) override {
@@ -68,7 +68,7 @@ public:
 	BreakPlatform(float x, float y) 
 		: Platform(x, y)
 	{
-		rect->setFillColor(sf::Color::Magenta);
+		rect->setTexture(new sf::Texture(sf::Image("BreakTile.png")));
 	}
 
 	int trigger(sf::RectangleShape* doodler, sf::Vector2f* dv) override {
@@ -84,14 +84,14 @@ public:
 	MovePlatform(float x, float y)
 		: Platform(x, y)
 	{
-		rect->setFillColor(sf::Color::Blue);
+		rect->setTexture(new sf::Texture(sf::Image("MovingTile.png")));
 		currentShift = -50;
 		dir = 1;
 	}
 
 	int trigger(sf::RectangleShape* doodler, sf::Vector2f* dv) override {
 		dv->y -= 30;
-		return 1;
+		return 0;
 	}
 
 	void update()
@@ -101,6 +101,7 @@ public:
 		if (currentShift > 50)
 			dir = -1;
 
+		currentShift += dir;
 		posX += dir;
 		left = posX - 30;
 		right = posX + 30;

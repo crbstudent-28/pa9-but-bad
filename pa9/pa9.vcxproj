@@ -82,13 +82,25 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="ApplicationBase.h" />
     <ClInclude Include="Platform.h" />
+    <ClInclude Include="TestApp.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Doodle.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Background.png" />
+    <Image Include="BackgroundTest.png" />
+    <Image Include="BounceTile.png" />
+    <Image Include="BouncyTile.png" />
+    <Image Include="BreakTile.png" />
+    <Image Include="Character.png" />
+    <Image Include="MovingTile.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
