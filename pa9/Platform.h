@@ -7,19 +7,34 @@ using namespace std;
 class Platform {
 public:
 	sf::RectangleShape* rect;
-	//derived classes won't work without a default constructor
-	Platform() {
-		rect = new sf::RectangleShape;
-	}
 	Platform(float x, float y) {
 		rect = new sf::RectangleShape;
 		rect->setSize(sf::Vector2f(60, 10));
+		posX = x;
+		posY = y;
+		left = posX - 30;
+		right = posX + 30;
 		rect->setPosition(sf::Vector2f(x, y));
 		rect->setFillColor(sf::Color::Green);
 	}
 	virtual int trigger(sf::RectangleShape* doodler, sf::Vector2f* dv) {
 		dv->y -= 30;
 		return 0;
+	}
+	virtual void update() {}
+	void move(int y)
+	{
+		posY += y;
+		rect->setPosition(sf::Vector2f(posX, posY));
+	}
+	bool colliding(sf::Vector2f pos, sf::Vector2f size)
+	{
+		bool isColliding = true;
+		isColliding &= pos.y		  > posY - 30;
+		isColliding &= pos.y - size.y < posY;
+		isColliding &= pos.x - size.x < right;
+		isColliding &= pos.x		  > left;
+		return isColliding;
 	}
 	//draw function needs a getter rather than a public member
 	sf::RectangleShape getrect() {
@@ -29,14 +44,16 @@ public:
 		delete rect;
 		rect = nullptr;
 	}
+protected:
+	int posX, posY;
+	float left, right;
 };
 
 class SuperPlatform : public Platform {
 public:
-	SuperPlatform(float x, float y) {
-		rect = new sf::RectangleShape;
-		rect->setSize(sf::Vector2f(60, 10));
-		rect->setPosition(sf::Vector2f(x, y));
+	SuperPlatform(float x, float y)
+	: Platform(x, y)
+	{
 		rect->setFillColor(sf::Color::Yellow);
 	}
 	
@@ -48,10 +65,9 @@ public:
 
 class BreakPlatform : public Platform {
 public:
-	BreakPlatform(float x, float y) {
-		rect = new sf::RectangleShape;
-		rect->setSize(sf::Vector2f(60, 10));
-		rect->setPosition(sf::Vector2f(x, y));
+	BreakPlatform(float x, float y) 
+		: Platform(x, y)
+	{
 		rect->setFillColor(sf::Color::Magenta);
 	}
 
@@ -59,4 +75,38 @@ public:
 		dv->y -= 30;
 		return 1;
 	}
+};
+
+
+
+class MovePlatform : public Platform {
+public:
+	MovePlatform(float x, float y)
+		: Platform(x, y)
+	{
+		rect->setFillColor(sf::Color::Blue);
+		currentShift = -50;
+		dir = 1;
+	}
+
+	int trigger(sf::RectangleShape* doodler, sf::Vector2f* dv) override {
+		dv->y -= 30;
+		return 1;
+	}
+
+	void update()
+	{
+		if (currentShift < -50)
+			dir = 1;
+		if (currentShift > 50)
+			dir = -1;
+
+		posX += dir;
+		left = posX - 30;
+		right = posX + 30;
+		rect->setPosition(sf::Vector2f(posX, posY));
+	}
+private:
+	int currentShift;
+	int dir;
 };
